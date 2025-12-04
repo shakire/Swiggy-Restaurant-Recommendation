@@ -6,11 +6,11 @@ def load_data():
     cleaned = pd.read_csv(r"C:\Data science\Project4-SwiggyAnalysis\cleaned_data.csv")
     clustered = pd.read_csv(r"C:\Data science\Project4-SwiggyAnalysis\encoded_data_Cluster.csv")
 
-    # Rename city_cleaned → city if needed
+   
     if "city_cleaned" in cleaned.columns and "city" not in cleaned.columns:
         cleaned = cleaned.rename(columns={"city_cleaned": "city"})
 
-    # Attach cluster column
+   
     cluster_col = "Cluster" if "Cluster" in clustered.columns else "cluster"
     cleaned["cluster"] = clustered[cluster_col].values
 
@@ -27,7 +27,7 @@ st.write(
 
 st.sidebar.header("🔍 Search Filters")
 
-# --- Sidebar filters ---
+
 
 city_options = ["All"] + sorted(df["city"].dropna().unique().tolist())
 selected_city = st.sidebar.selectbox("City", city_options)
@@ -55,7 +55,7 @@ selected_cost_range = st.sidebar.slider(
     step=50,
 )
 
-# --- Apply filters ---
+
 
 filtered = df.copy()
 
@@ -71,14 +71,14 @@ filtered = filtered[
     & (filtered["cost"] <= selected_cost_range[1])
 ]
 
-# --- TABLE 1: Top 5 restaurants ---
+
 
 st.subheader("🎯 Top 5 Restaurants")
 
 if filtered.empty:
     st.warning("No restaurants match your filters. Try changing city, cuisine, rating or cost.")
 else:
-    # Sort by rating and rating_count (best first)
+    
     filtered_sorted = filtered.sort_values(
         by=["rating", "rating_count"],
         ascending=[False, False]
@@ -92,23 +92,23 @@ else:
         .reset_index(drop=True)
     )
 
-    # --- TABLE 2: Cost-based recommendations ---
+   
 
     st.subheader("💸 Cost-based Recommendations (Same Cluster)")
 
-    # Clusters present in Top 5
+    
     clusters_top5 = top5["cluster"].unique()
 
-    # Exclude the already shown Top 5
+   
     remaining = filtered_sorted[~filtered_sorted.index.isin(top5.index)]
 
-    # Keep only restaurants in the same cluster(s) as Top 5
+    
     remaining_same_cluster = remaining[remaining["cluster"].isin(clusters_top5)]
 
     if remaining_same_cluster.empty:
         st.info("Not enough restaurants in the same cluster to generate cost-based recommendations.")
     else:
-        # Sort remaining by cost (low → high), then rating (high → low)
+       
         cost_based = remaining_same_cluster.sort_values(
             by=["cost", "rating"],
             ascending=[True, False]
